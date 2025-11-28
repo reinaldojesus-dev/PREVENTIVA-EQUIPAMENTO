@@ -1,0 +1,5 @@
+{
+  "name": "Preventiva de Equipamento",
+  "description": "Um sistema para colaboradores preencherem checklists de manutenção preventiva para diversos tipos de equipamentos, com funcionalidades de exportação e armazenamento local.",
+  "requestFramePermissions": []
+}
