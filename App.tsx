@@ -184,7 +184,7 @@ const PdfContent = React.forwardRef<HTMLDivElement, PdfContentProps>(({ formData
             </div>
         </section>
 
-        <section className="mb-4">
+        <section className="mb-4 pb-2 border-b border-gray-300">
             <h2 className="text-base font-bold text-gray-800 mb-2">Detalhes do Equipamento</h2>
             <div className="text-xs grid grid-cols-2 gap-x-6">
                 <p><strong>Tipo:</strong> {formData.equipmentType}</p>
