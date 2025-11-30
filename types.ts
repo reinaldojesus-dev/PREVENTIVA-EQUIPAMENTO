@@ -67,6 +67,7 @@ export interface RackCpdChecklist {
 
 export interface FormData extends BaseChecklist {
   id: number;
+  savedAt: number;
   collaboratorName: string;
   date: string;
   unit: string;

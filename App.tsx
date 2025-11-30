@@ -276,6 +276,7 @@ const PdfContent = React.forwardRef<HTMLDivElement, PdfContentProps>(({ formData
 const App: React.FC = () => {
     const initialFormData: FormData = {
         id: 0,
+        savedAt: 0,
         collaboratorName: '',
         date: new Date().toISOString().split('T')[0],
         unit: '',
@@ -326,6 +327,18 @@ const App: React.FC = () => {
         }
     }, [formData]);
 
+    const generateUniqueId = (): number => {
+        let newId = 0;
+        let isUnique = false;
+        while (!isUnique) {
+            newId = Math.floor(Math.random() * 1_000_000_000);
+            if (!savedChecklists.some(c => c.id === newId)) {
+                isUnique = true;
+            }
+        }
+        return newId;
+    };
+
     const handleSaveData = () => {
         const analystNameRegex = /^[a-zA-Z]+\.[a-zA-Z]+$/;
         if (!formData.collaboratorName || !analystNameRegex.test(formData.collaboratorName)) {
@@ -339,18 +352,30 @@ const App: React.FC = () => {
         }
 
         try {
-            const newChecklist = { ...formData, id: Date.now() };
+            let history: FormData[] = [...savedChecklists];
 
-            const historyJSON = localStorage.getItem('checklistHistory');
-            let history: FormData[] = historyJSON ? JSON.parse(historyJSON) : [];
+            // If formData has an ID, it's an update.
+            if (formData.id !== 0) {
+                const updatedChecklist = { ...formData, savedAt: Date.now() };
+                history = history.map(c => c.id === formData.id ? updatedChecklist : c);
+                alert('Checklist atualizado com sucesso!');
+            } else { // Otherwise, it's a new entry.
+                const newChecklist = { 
+                    ...formData, 
+                    id: generateUniqueId(),
+                    savedAt: Date.now() 
+                };
+                history.unshift(newChecklist);
+                 alert('Checklist salvo com sucesso na lista de recentes!');
+            }
             
-            history.unshift(newChecklist);
-            history = history.slice(0, 5); // Keep only the last 5
+            // Sort by savedAt date and limit the list size
+            history.sort((a, b) => b.savedAt - a.savedAt);
+            const limitedHistory = history.slice(0, 5);
 
-            localStorage.setItem('checklistHistory', JSON.stringify(history));
-            setSavedChecklists(history);
+            localStorage.setItem('checklistHistory', JSON.stringify(limitedHistory));
+            setSavedChecklists(limitedHistory);
 
-            alert('Checklist salvo com sucesso na lista de recentes!');
 
             // Reset equipment-related fields for the next entry, keeping identification data
             setFormData(prev => ({
@@ -370,14 +395,9 @@ const App: React.FC = () => {
     const handleLoadChecklist = (id: number) => {
         const checklistToLoad = savedChecklists.find(c => c.id === id);
         if (checklistToLoad) {
-            const dataToLoad = { ...checklistToLoad };
-            dataToLoad.internalPhoto = undefined;
-            dataToLoad.externalPhoto = undefined;
-            dataToLoad.beforeInternalPhoto = undefined;
-            dataToLoad.beforeExternalPhoto = undefined;
-            setFormData(dataToLoad);
+            setFormData(checklistToLoad);
             window.scrollTo(0, 0);
-            alert('Checklist carregado com sucesso!');
+            alert('Checklist carregado para edição!');
         }
     };
 
@@ -810,7 +830,7 @@ const App: React.FC = () => {
                                             {checklist.locationName && ` (${checklist.locationName})`}
                                             {checklist.terminalLaneType && ` - Pista ${checklist.terminalLaneType}`}
                                         </p>
-                                        <p className="text-xs text-gray-500 dark:text-gray-500">Salvo em: {new Date(checklist.id).toLocaleString('pt-BR')}</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-500">Salvo em: {new Date(checklist.savedAt).toLocaleString('pt-BR')}</p>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <button onClick={() => generatePdfForItem(checklist)} disabled={isGenerating} className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-full transition-colors disabled:text-gray-400 disabled:cursor-not-allowed" title="Gerar PDF">
