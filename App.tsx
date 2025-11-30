@@ -37,6 +37,70 @@ const Trash2Icon: React.FC<{ className?: string }> = ({ className }) => (
 );
 
 // --- Reusable UI Components ---
+interface AutocompleteInputProps {
+    name: string;
+    value: string;
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    suggestions: string[];
+    placeholder: string;
+}
+const AutocompleteInput: React.FC<AutocompleteInputProps> = ({ name, value, onChange, suggestions, placeholder }) => {
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const wrapperRef = useRef<HTMLDivElement>(null);
+
+    const filteredSuggestions = suggestions.filter(suggestion =>
+        suggestion.toLowerCase().includes(value.toLowerCase())
+    );
+
+    const handleSelect = (suggestion: string) => {
+        const fakeEvent = {
+            target: { name, value: suggestion }
+        } as React.ChangeEvent<HTMLInputElement>;
+        onChange(fakeEvent);
+        setShowSuggestions(false);
+    };
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+                setShowSuggestions(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [wrapperRef]);
+    
+    return (
+        <div className="relative" ref={wrapperRef}>
+            <input
+                type="text"
+                name={name}
+                placeholder={placeholder}
+                value={value}
+                onChange={onChange}
+                onFocus={() => setShowSuggestions(true)}
+                autoComplete="off"
+                className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-green-500 focus:border-green-500"
+            />
+            {showSuggestions && value && filteredSuggestions.length > 0 && (
+                <ul className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-auto">
+                    {filteredSuggestions.map((suggestion, index) => (
+                        <li
+                            key={index}
+                            onClick={() => handleSelect(suggestion)}
+                            className="p-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                        >
+                            {suggestion}
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </div>
+    );
+};
+
 
 interface CheckboxProps {
     label: string;
@@ -199,7 +263,7 @@ const PdfContent = React.forwardRef<HTMLDivElement, PdfContentProps>(({ formData
                  {formData.locationName && (
                     <p><strong>Local/Nome:</strong> {formData.locationName}</p>
                 )}
-                {formData.equipmentType === EquipmentType.TERMINAIS && formData.terminalLaneType && (
+                {(formData.equipmentType === EquipmentType.TERMINAIS || formData.equipmentType === EquipmentType.CANCELAS) && formData.terminalLaneType && (
                     <p><strong>Pista:</strong> {formData.terminalLaneType}</p>
                 )}
                 {formData.equipmentType === EquipmentType.OUTROS && formData.otherEquipmentName &&(
@@ -302,18 +366,29 @@ const App: React.FC = () => {
     const [savedChecklists, setSavedChecklists] = useState<FormData[]>([]);
     const [isGenerating, setIsGenerating] = useState(false);
     const [pdfData, setPdfData] = useState<FormData>(initialFormData);
+    const [analystSuggestions, setAnalystSuggestions] = useState<string[]>([]);
+    const [unitSuggestions, setUnitSuggestions] = useState<string[]>([]);
+    const [citySuggestions, setCitySuggestions] = useState<string[]>([]);
     const formRef = useRef<HTMLDivElement>(null);
     const pdfRef = useRef<HTMLDivElement>(null);
 
-    // Load history from localStorage on initial render
+    // Load history and suggestions from localStorage on initial render
     useEffect(() => {
         try {
             const history = localStorage.getItem('checklistHistory');
-            if (history) {
-                setSavedChecklists(JSON.parse(history));
-            }
+            if (history) setSavedChecklists(JSON.parse(history));
+            
+            const analysts = localStorage.getItem('preventiveAnalystNames');
+            if (analysts) setAnalystSuggestions(JSON.parse(analysts));
+
+            const units = localStorage.getItem('preventiveUnitNames');
+            if (units) setUnitSuggestions(JSON.parse(units));
+            
+            const cities = localStorage.getItem('preventiveCityNames');
+            if (cities) setCitySuggestions(JSON.parse(cities));
+
         } catch (error) {
-            console.error("Failed to load history from localStorage", error);
+            console.error("Failed to load data from localStorage", error);
         }
     }, []);
     
@@ -326,6 +401,18 @@ const App: React.FC = () => {
             console.error("Failed to save session to localStorage", error);
         }
     }, [formData]);
+    
+    const updateSuggestions = (key: string, value: string, suggestions: string[], setter: React.Dispatch<React.SetStateAction<string[]>>) => {
+        if (!value) return;
+        const lowerCaseValue = value.toLowerCase();
+        const suggestionExists = suggestions.some(s => s.toLowerCase() === lowerCaseValue);
+
+        if (!suggestionExists) {
+            const newSuggestions = [value, ...suggestions].slice(0, 15);
+            setter(newSuggestions);
+            localStorage.setItem(key, JSON.stringify(newSuggestions));
+        }
+    };
 
     const generateUniqueId = (): number => {
         let newId = 0;
@@ -369,6 +456,11 @@ const App: React.FC = () => {
                  alert('Checklist salvo com sucesso na lista de recentes!');
             }
             
+            // Update suggestions
+            updateSuggestions('preventiveAnalystNames', formData.collaboratorName, analystSuggestions, setAnalystSuggestions);
+            updateSuggestions('preventiveUnitNames', formData.unit, unitSuggestions, setUnitSuggestions);
+            updateSuggestions('preventiveCityNames', formData.city, citySuggestions, setCitySuggestions);
+
             // Sort by savedAt date and limit the list size
             history.sort((a, b) => b.savedAt - a.savedAt);
             const limitedHistory = history.slice(0, 5);
@@ -727,10 +819,10 @@ const App: React.FC = () => {
                         <div className="p-6 border border-gray-200 dark:border-gray-800 rounded-lg">
                             <h2 className="text-xl font-semibold mb-4 border-b pb-2 border-gray-200 dark:border-gray-800">Identificação</h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <input type="text" name="collaboratorName" placeholder="Nome do Analista (ex: nome.sobrenome)" value={formData.collaboratorName} onChange={handleInputChange} className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-green-500 focus:border-green-500" />
+                                <AutocompleteInput name="collaboratorName" placeholder="Nome do Analista (ex: nome.sobrenome)" value={formData.collaboratorName} onChange={handleInputChange} suggestions={analystSuggestions} />
                                 <input type="date" name="date" value={formData.date} onChange={handleInputChange} className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-green-500 focus:border-green-500" />
-                                <input type="text" name="unit" placeholder="Unidade (Ex: Nome da Garagem)" value={formData.unit} onChange={handleInputChange} className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-green-500 focus:border-green-500" />
-                                <input type="text" name="city" placeholder="Cidade (Opcional)" value={formData.city} onChange={handleInputChange} className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-green-500 focus:border-green-500" />
+                                <AutocompleteInput name="unit" placeholder="Unidade (Ex: Nome da Garagem)" value={formData.unit} onChange={handleInputChange} suggestions={unitSuggestions} />
+                                <AutocompleteInput name="city" placeholder="Cidade (Opcional)" value={formData.city} onChange={handleInputChange} suggestions={citySuggestions} />
                             </div>
                         </div>
 
@@ -750,7 +842,7 @@ const App: React.FC = () => {
                                     <option value={EquipmentType.OUTROS}>Outros</option>
                                 </select>
                                 
-                                {formData.equipmentType === EquipmentType.TERMINAIS ? (
+                                {(formData.equipmentType === EquipmentType.TERMINAIS || formData.equipmentType === EquipmentType.CANCELAS) ? (
                                     <select name="terminalLaneType" value={formData.terminalLaneType} onChange={handleInputChange} className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-green-500 focus:border-green-500">
                                         <option value="">Selecione o tipo de pista...</option>
                                         <option value="Entrada">Entrada</option>
