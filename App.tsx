@@ -300,6 +300,7 @@ const App: React.FC = () => {
     const [formData, setFormData] = useState<FormData>(initialFormData);
     const [savedChecklists, setSavedChecklists] = useState<FormData[]>([]);
     const [isGenerating, setIsGenerating] = useState(false);
+    const [pdfData, setPdfData] = useState<FormData>(initialFormData);
     const formRef = useRef<HTMLDivElement>(null);
     const pdfRef = useRef<HTMLDivElement>(null);
 
@@ -315,8 +316,9 @@ const App: React.FC = () => {
         }
     }, []);
     
-    // Autosave current form data for session recovery
+    // Autosave current form data to sync with the PDF generation data state
     useEffect(() => {
+        setPdfData(formData);
         try {
             localStorage.setItem('preventiveFormData', JSON.stringify(formData));
         } catch (error) {
@@ -493,7 +495,7 @@ const App: React.FC = () => {
             const yOffset = (pdfHeight - imgHeight) / 2;
 
             pdf.addImage(imgData, 'PNG', xOffset, yOffset, imgWidth, imgHeight);
-            pdf.save(`preventiva_${formData.unit || 'unidade'}_${formData.equipmentType}.pdf`);
+            pdf.save(`preventiva_${pdfData.unit || 'unidade'}_${pdfData.equipmentType}.pdf`);
         } catch (error) {
             console.error("Error generating PDF:", error);
             alert("Ocorreu um erro ao gerar o PDF. Verifique o console para mais detalhes.");
@@ -557,13 +559,13 @@ const App: React.FC = () => {
                 throw new Error("Falha na conversão do relatório para PDF.");
             }
     
-            const fileName = `preventiva_${formData.unit || 'unidade'}_${formData.equipmentType}.pdf`;
+            const fileName = `preventiva_${pdfData.unit || 'unidade'}_${pdfData.equipmentType}.pdf`;
             const file = new File([blob], fileName, { type: 'application/pdf' });
             
             const shareData = {
                 files: [file],
-                title: `Preventiva: ${formData.unit || 'Unidade'}`,
-                text: `Checklist de manutenção preventiva para ${formData.equipmentType} na unidade ${formData.unit}.`
+                title: `Preventiva: ${pdfData.unit || 'Unidade'}`,
+                text: `Checklist de manutenção preventiva para ${pdfData.equipmentType} na unidade ${pdfData.unit}.`
             };
             
             if (navigator.canShare && !navigator.canShare({ files: [file] })) {
@@ -582,6 +584,20 @@ const App: React.FC = () => {
         } finally {
             setIsGenerating(false);
         }
+    };
+    
+    const generatePdfForItem = (item: FormData) => {
+        setPdfData(item);
+        setTimeout(() => {
+            handleGeneratePdf();
+        }, 100);
+    };
+
+    const sendWhatsappForItem = (item: FormData) => {
+        setPdfData(item);
+        setTimeout(() => {
+            handleSendWhatsapp();
+        }, 100);
     };
 
     const renderChecklist = () => {
@@ -780,18 +796,6 @@ const App: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Section 5: Actions */}
-                <div className="mt-8 p-4 bg-gray-50 dark:bg-gray-950/50 rounded-lg shadow-md">
-                    <div className="flex flex-wrap items-center justify-center gap-4">
-                        <button onClick={handleGeneratePdf} disabled={isGenerating} className="flex items-center gap-2 px-5 py-3 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
-                           <FileTextIcon className="w-5 h-5"/> {isGenerating ? 'Gerando...' : 'Gerar PDF'}
-                        </button>
-                         <button onClick={handleSendWhatsapp} disabled={isGenerating} className="flex items-center gap-2 px-5 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
-                           <WhatsappIcon className="w-5 h-5"/> {isGenerating ? 'Enviando...' : 'Enviar por WhatsApp'}
-                        </button>
-                    </div>
-                </div>
-
                 {/* Section 6: Saved Checklists */}
                 <div className="mt-8">
                     <h2 className="text-2xl font-semibold text-center text-gray-800 dark:text-white mb-6">Últimos Checklists Salvos</h2>
@@ -809,10 +813,16 @@ const App: React.FC = () => {
                                         <p className="text-xs text-gray-500 dark:text-gray-500">Salvo em: {new Date(checklist.id).toLocaleString('pt-BR')}</p>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <button onClick={() => handleLoadChecklist(checklist.id)} className="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-full transition-colors" title="Carregar Checklist">
+                                        <button onClick={() => generatePdfForItem(checklist)} disabled={isGenerating} className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-full transition-colors disabled:text-gray-400 disabled:cursor-not-allowed" title="Gerar PDF">
+                                            <FileTextIcon className="w-5 h-5" />
+                                        </button>
+                                        <button onClick={() => sendWhatsappForItem(checklist)} disabled={isGenerating} className="p-2 text-green-600 hover:bg-green-100 dark:hover:bg-green-900/50 rounded-full transition-colors disabled:text-gray-400 disabled:cursor-not-allowed" title="Enviar por WhatsApp">
+                                            <WhatsappIcon className="w-5 h-5" />
+                                        </button>
+                                        <button onClick={() => handleLoadChecklist(checklist.id)} disabled={isGenerating} className="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-full transition-colors" title="Carregar Checklist">
                                             <DownloadIcon className="w-5 h-5" />
                                         </button>
-                                        <button onClick={() => handleDeleteChecklist(checklist.id)} className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-full transition-colors" title="Remover Checklist">
+                                        <button onClick={() => handleDeleteChecklist(checklist.id)} disabled={isGenerating} className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-full transition-colors" title="Remover Checklist">
                                             <Trash2Icon className="w-5 h-5" />
                                         </button>
                                     </div>
@@ -827,7 +837,7 @@ const App: React.FC = () => {
 
             {/* Off-screen component for PDF generation */}
             <div style={{ position: 'absolute', left: '-9999px', top: 0, zIndex: -1 }}>
-                <PdfContent ref={pdfRef} formData={formData} />
+                <PdfContent ref={pdfRef} formData={pdfData} />
             </div>
         </div>
     );
