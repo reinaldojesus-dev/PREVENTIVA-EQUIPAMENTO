@@ -1,11 +1,12 @@
-
 export enum EquipmentType {
   NONE = 'NONE',
-  CANCELA = 'CANCELA',
-  TERMINAL = 'TERMINAL',
+  TERMINAIS = 'TERMINAIS',
+  CANCELAS = 'CANCELAS',
+  CAMERAS = 'CAMERAS',
   CAIXA = 'CAIXA',
-  PDV = 'PDV',
   EPA = 'EPA',
+  CFTV = 'CFTV',
+  RACK_CPD = 'RACK_CPD',
   OUTROS = 'OUTROS',
 }
 
@@ -18,36 +19,65 @@ export interface BaseChecklist {
     externalPhotoName?: string;
 }
 
-export interface CancelaChecklist {
-  limpezaPlaca: boolean;
-  lubrificacaoMecanismos: boolean;
-  organizacaoCabos: boolean;
-  fixacaoPasteis: boolean;
+export interface TerminaisChecklist {
+  limpezaGabinete: boolean;
+  organizacaoCabosTerminais: boolean;
+  limpezaImpressoraGuilhotina: boolean;
+  limpezaLeitorTerminal: boolean;
+  limpaContatoConexoes: boolean;
 }
 
-export interface TerminalChecklist {
-  terminalName: string;
-  limpezaPlacas: boolean;
-  limpezaImpressora: boolean;
-  organizacaoCabos: boolean;
-  testeVoltagem: boolean;
-  limpezaLeitor: boolean;
+export interface CancelasChecklist {
+  lubrificacaoEixoMotor: boolean;
+  lubrificacaoPartesArticuladas: boolean;
+  fotosDepoisCancelas: boolean;
 }
 
-export interface EpaChecklist {
-  epaName: string;
+export interface CamerasChecklist {
+  limpezaLenteCameras: boolean;
+  verificarFocoPosicionamento: boolean;
+  fotosDepoisCameras: boolean;
+}
+
+export interface CaixaEpaChecklist {
+  verificarImagemPadrao: boolean;
   limpezaMiniPC: boolean;
-  limpezaImpressora: boolean;
-  organizacaoCabos: boolean;
-  testeVoltagem: boolean;
-  limpezaLeitor: boolean;
-  calibragemMonitor: boolean;
+  organizacaoCabosCaixa: boolean;
+  testeNobreak: boolean;
+  limpezaArquivosTemporarios: boolean;
+  verificarVersaoPdv: boolean;
+  checagemAcessosRemotos: boolean;
+  verificarNomeMaquina: boolean;
 }
+
+export interface CftvChecklist {
+  organizacaoCabosCftv: boolean;
+  ajustarHorarioPdv: boolean;
+  ajustarNomenclaturaNvr: boolean;
+}
+
+export interface RackCpdChecklist {
+  limpezaOrganizacaoCabosRack: boolean;
+  remocaoCabosDiretoSwitch: boolean;
+  atualizacaoPsIs: boolean;
+  backupBancoDadosImagem: boolean;
+  testarNobreaksRack: boolean;
+}
+
 
 export interface FormData extends BaseChecklist {
+  id: number;
+  collaboratorName: string;
+  date: string;
   unit: string;
   city: string;
   equipmentType: EquipmentType;
+  terminalLaneType: string;
+  locationName: string;
   otherEquipmentName: string;
-  checklist: Partial<CancelaChecklist & TerminalChecklist & EpaChecklist>;
+  checklist: Partial<TerminaisChecklist & CancelasChecklist & CamerasChecklist & CaixaEpaChecklist & CftvChecklist & RackCpdChecklist>;
+  beforeInternalPhoto?: string;
+  beforeInternalPhotoName?: string;
+  beforeExternalPhoto?: string;
+  beforeExternalPhotoName?: string;
 }
