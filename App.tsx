@@ -180,7 +180,7 @@ const getChecklistItemsForPdf = (formData: FormData): { label: string; checked: 
             { name: "organizacaoCabosTerminais", label: "2. Organização dos cabeamentos" },
             { name: "limpezaImpressoraGuilhotina", label: "3. Limpeza da impressora e lubrificação da guilhotina" },
             { name: "limpezaLeitorTerminal", label: "4. Limpeza do leitor" },
-            { name: "limpaContatoConexoes", label: "5. Passar limpa contato em todas as conexões dos cabos e placas" },
+            { name: "limpaContatoConexoes", label: "5. Limpeza c/ limpa contato em conexões eletrônicas e placas" },
         ],
         [EquipmentType.CANCELAS]: [
             { name: "lubrificacaoEixoMotor", label: "1. Lubrificação do eixo do motor com graxa" },
@@ -733,7 +733,7 @@ const App: React.FC = () => {
                         <CheckboxItem name="organizacaoCabosTerminais" label="2. Organização dos cabeamentos" checked={!!terminaisData.organizacaoCabosTerminais} onChange={handleCheckboxChange} />
                         <CheckboxItem name="limpezaImpressoraGuilhotina" label="3. Limpeza da impressora e lubrificação da guilhotina" checked={!!terminaisData.limpezaImpressoraGuilhotina} onChange={handleCheckboxChange} />
                         <CheckboxItem name="limpezaLeitorTerminal" label="4. Limpeza do leitor" checked={!!terminaisData.limpezaLeitorTerminal} onChange={handleCheckboxChange} />
-                        <CheckboxItem name="limpaContatoConexoes" label="5. Passar limpa contato em todas as conexões dos cabos e placas" checked={!!terminaisData.limpaContatoConexoes} onChange={handleCheckboxChange} />
+                        <CheckboxItem name="limpaContatoConexoes" label="5. Limpeza c/ limpa contato em conexões eletrônicas e placas" checked={!!terminaisData.limpaContatoConexoes} onChange={handleCheckboxChange} />
                     </>
                 );
 
