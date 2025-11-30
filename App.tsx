@@ -168,7 +168,11 @@ const getChecklistItemsForPdf = (formData: FormData): { label: string; checked: 
 };
 
 
-const PdfContent = React.forwardRef<HTMLDivElement, PdfContentProps>(({ formData }, ref) => (
+const PdfContent = React.forwardRef<HTMLDivElement, PdfContentProps>(({ formData }, ref) => {
+    const checklistItems = getChecklistItemsForPdf(formData);
+    const hasPhotos = formData.beforeInternalPhoto || formData.beforeExternalPhoto || formData.internalPhoto || formData.externalPhoto;
+
+    return (
     <div ref={ref} className="p-6 bg-white text-black font-sans" style={{ width: '8.5in' }}>
         <header className="text-center mb-4">
             <h1 className="text-xl font-bold text-gray-800">Relatório de Manutenção Preventiva</h1>
@@ -176,11 +180,15 @@ const PdfContent = React.forwardRef<HTMLDivElement, PdfContentProps>(({ formData
 
         <section className="mb-4 pb-2 border-b border-gray-300">
             <h2 className="text-base font-bold text-gray-800 mb-2">Identificação</h2>
-            <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-xs">
-                <p><strong>Analista:</strong> {formData.collaboratorName || 'Não informado'}</p>
-                <p><strong>Data:</strong> {new Date(formData.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</p>
-                <p><strong>Unidade:</strong> {formData.unit || 'Não informado'}</p>
-                <p><strong>Cidade:</strong> {formData.city || 'Não informada'}</p>
+            <div className="text-xs space-y-1">
+                <div className="flex justify-between">
+                    <p><strong>Analista:</strong> {formData.collaboratorName || 'Não informado'}</p>
+                    <p><strong>Data:</strong> {new Date(formData.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</p>
+                </div>
+                <div className="flex justify-between">
+                    <p><strong>Unidade:</strong> {formData.unit || 'Não informado'}</p>
+                    <p><strong>Cidade:</strong> {formData.city || 'Não informada'}</p>
+                </div>
             </div>
         </section>
 
@@ -202,14 +210,18 @@ const PdfContent = React.forwardRef<HTMLDivElement, PdfContentProps>(({ formData
         
         <section className="mb-4">
             <h2 className="text-base font-bold text-gray-800 mb-2">Checklist de Verificação</h2>
-            <ul className="list-none space-y-1 text-xs">
-                {getChecklistItemsForPdf(formData).map(item => (
-                    <li key={item.label} className="flex items-center">
-                        <span className={`inline-block w-3 h-3 mr-2 border ${item.checked ? 'bg-green-500 border-green-700' : 'bg-gray-200 border-gray-400'}`}></span>
-                        <span>{item.label}</span>
-                    </li>
-                ))}
-            </ul>
+            {checklistItems.length > 0 ? (
+                <ul className="list-none space-y-1 text-xs">
+                    {checklistItems.map(item => (
+                        <li key={item.label} className="flex items-center">
+                            <span className={`inline-block w-3 h-3 mr-2 border ${item.checked ? 'bg-green-500 border-green-700' : 'bg-white border-gray-400'}`}></span>
+                            <span>{item.label}</span>
+                        </li>
+                    ))}
+                </ul>
+            ) : (
+                <p className="text-xs text-gray-500">Nenhum item de verificação aplicável.</p>
+            )}
         </section>
         
         <section className="mb-4">
@@ -224,35 +236,39 @@ const PdfContent = React.forwardRef<HTMLDivElement, PdfContentProps>(({ formData
 
         <section>
             <h2 className="text-base font-bold text-gray-800 mb-2">Fotos Anexadas</h2>
-            <div className="grid grid-cols-2 gap-2">
-                {formData.beforeInternalPhoto && (
-                    <div>
-                        <h3 className="font-semibold text-center text-xs mb-1">Interna (Antes)</h3>
-                        <img src={formData.beforeInternalPhoto} alt="Foto Interna Antes" className="w-full h-auto border border-gray-300 rounded"/>
-                    </div>
-                )}
-                 {formData.beforeExternalPhoto && (
-                    <div>
-                        <h3 className="font-semibold text-center text-xs mb-1">Externa (Antes)</h3>
-                        <img src={formData.beforeExternalPhoto} alt="Foto Externa Antes" className="w-full h-auto border border-gray-300 rounded"/>
-                    </div>
-                )}
-                {formData.internalPhoto && (
-                    <div>
-                        <h3 className="font-semibold text-center text-xs mb-1">Interna (Depois)</h3>
-                        <img src={formData.internalPhoto} alt="Foto Interna Depois" className="w-full h-auto border border-gray-300 rounded"/>
-                    </div>
-                )}
-                {formData.externalPhoto && (
-                    <div>
-                        <h3 className="font-semibold text-center text-xs mb-1">Externa (Depois)</h3>
-                        <img src={formData.externalPhoto} alt="Foto Externa Depois" className="w-full h-auto border border-gray-300 rounded"/>
-                    </div>
-                )}
-            </div>
+            {hasPhotos ? (
+                <div className="grid grid-cols-2 gap-4">
+                    {formData.beforeInternalPhoto && (
+                        <div>
+                            <h3 className="font-semibold text-center text-xs mb-1">Interna (Antes)</h3>
+                            <img src={formData.beforeInternalPhoto} alt="Foto Interna Antes" className="w-full h-64 object-cover border border-gray-300 rounded"/>
+                        </div>
+                    )}
+                    {formData.beforeExternalPhoto && (
+                        <div>
+                            <h3 className="font-semibold text-center text-xs mb-1">Externa (Antes)</h3>
+                            <img src={formData.beforeExternalPhoto} alt="Foto Externa Antes" className="w-full h-64 object-cover border border-gray-300 rounded"/>
+                        </div>
+                    )}
+                    {formData.internalPhoto && (
+                        <div>
+                            <h3 className="font-semibold text-center text-xs mb-1">Interna (Depois)</h3>
+                            <img src={formData.internalPhoto} alt="Foto Interna Depois" className="w-full h-64 object-cover border border-gray-300 rounded"/>
+                        </div>
+                    )}
+                    {formData.externalPhoto && (
+                        <div>
+                            <h3 className="font-semibold text-center text-xs mb-1">Externa (Depois)</h3>
+                            <img src={formData.externalPhoto} alt="Foto Externa Depois" className="w-full h-64 object-cover border border-gray-300 rounded"/>
+                        </div>
+                    )}
+                </div>
+            ) : (
+                <p className="text-xs text-gray-500">Nenhuma foto anexada.</p>
+            )}
         </section>
     </div>
-));
+)});
 
 
 // --- Main App Component ---
