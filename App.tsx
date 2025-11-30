@@ -60,31 +60,46 @@ const CheckboxItem: React.FC<CheckboxProps> = ({ label, checked, onChange, name 
 interface FileInputProps {
     label: string;
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onRemove: () => void;
     fileName?: string;
     previewUrl?: string;
 }
-const FileInput: React.FC<FileInputProps> = ({ label, onChange, fileName, previewUrl }) => (
+const FileInput: React.FC<FileInputProps> = ({ label, onChange, onRemove, fileName, previewUrl }) => (
     <div className="w-full">
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{label}</label>
-        <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-700 border-dashed rounded-md">
-            <div className="space-y-1 text-center">
-                {previewUrl ? (
-                    <img src={previewUrl} alt="Preview" className="mx-auto h-24 w-auto rounded-md object-cover" />
-                ) : (
-                    <UploadCloudIcon className="mx-auto h-12 w-12 text-gray-400" />
-                )}
-                <div className="flex text-sm text-gray-600 dark:text-gray-400">
-                    <label htmlFor={label} className="relative cursor-pointer bg-white dark:bg-gray-900 rounded-md font-medium text-green-600 dark:text-green-500 hover:text-green-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-green-500">
-                        <span>Carregar um arquivo</span>
-                        <input id={label} name={label} type="file" className="sr-only" onChange={onChange} accept="image/*" />
-                    </label>
-                    <p className="pl-1">ou arraste e solte</p>
+        {previewUrl ? (
+            <div className="relative group border border-gray-300 dark:border-gray-700 rounded-lg p-2 bg-gray-50 dark:bg-gray-800/50">
+                <img src={previewUrl} alt="Preview" className="w-full h-32 object-cover rounded-md" />
+                <div className="absolute inset-2 bg-black bg-opacity-0 group-hover:bg-opacity-60 transition-colors flex items-center justify-center rounded-md">
+                    <button 
+                        type="button" 
+                        onClick={onRemove} 
+                        className="opacity-0 group-hover:opacity-100 transition-opacity p-2 bg-red-600 text-white rounded-full shadow-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+                        aria-label={`Remover ${label}`}
+                    >
+                        <Trash2Icon className="w-5 h-5" />
+                    </button>
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-500">{fileName || "PNG, JPG até 10MB"}</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400 truncate mt-1 text-center font-medium">{fileName}</p>
             </div>
-        </div>
+        ) : (
+            <div className="mt-1">
+                 <label htmlFor={label} className="relative cursor-pointer w-full flex flex-col items-center justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-700 border-dashed rounded-lg hover:border-green-500 dark:hover:border-green-400 transition-colors">
+                    <input id={label} name={label} type="file" className="sr-only" onChange={onChange} accept="image/*" />
+                    <div className="space-y-1 text-center">
+                        <UploadCloudIcon className="mx-auto h-12 w-12 text-gray-400" />
+                        <div className="flex text-sm text-gray-600 dark:text-gray-400">
+                             <p className="font-medium text-green-600 dark:text-green-500">Clique para carregar</p>
+                             <p className="pl-1">ou arraste e solte</p>
+                        </div>
+                        <p className="text-xs text-gray-500 dark:text-gray-500">PNG, JPG até 10MB</p>
+                    </div>
+                </label>
+            </div>
+        )}
     </div>
 );
+
 
 // --- PDF Content Component (for rendering the report) ---
 interface PdfContentProps {
@@ -162,7 +177,7 @@ const PdfContent = React.forwardRef<HTMLDivElement, PdfContentProps>(({ formData
         <section className="mb-4 pb-2 border-b border-gray-300">
             <h2 className="text-base font-bold text-gray-800 mb-2">Identificação</h2>
             <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-xs">
-                <p><strong>Colaborador:</strong> {formData.collaboratorName || 'Não informado'}</p>
+                <p><strong>Analista:</strong> {formData.collaboratorName || 'Não informado'}</p>
                 <p><strong>Data:</strong> {new Date(formData.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</p>
                 <p><strong>Unidade:</strong> {formData.unit || 'Não informado'}</p>
                 <p><strong>Cidade:</strong> {formData.city || 'Não informada'}</p>
@@ -294,6 +309,12 @@ const App: React.FC = () => {
     }, [formData]);
 
     const handleSaveData = () => {
+        const analystNameRegex = /^[a-zA-Z]+\.[a-zA-Z]+$/;
+        if (!formData.collaboratorName || !analystNameRegex.test(formData.collaboratorName)) {
+            alert("Formato do Nome do Analista inválido. Por favor, preencha o campo no formato 'nome.sobrenome' (ex: reinaldo.jesus).");
+            return;
+        }
+
         if (!formData.unit || !formData.equipmentType || formData.equipmentType === EquipmentType.NONE) {
             alert('Por favor, preencha pelo menos a Unidade e o Tipo de Equipamento antes de salvar.');
             return;
@@ -402,6 +423,14 @@ const App: React.FC = () => {
             };
             reader.readAsDataURL(file);
         }
+    };
+    
+    const handleFileRemove = (field: 'internalPhoto' | 'externalPhoto' | 'beforeInternalPhoto' | 'beforeExternalPhoto') => {
+        setFormData(prev => ({
+            ...prev,
+            [field]: undefined,
+            [`${field}Name`]: '',
+        }));
     };
 
     const handleGeneratePdf = async () => {
@@ -646,7 +675,7 @@ const App: React.FC = () => {
                         <div className="p-6 border border-gray-200 dark:border-gray-800 rounded-lg">
                             <h2 className="text-xl font-semibold mb-4 border-b pb-2 border-gray-200 dark:border-gray-800">Identificação</h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <input type="text" name="collaboratorName" placeholder="Nome do Colaborador" value={formData.collaboratorName} onChange={handleInputChange} className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-green-500 focus:border-green-500" />
+                                <input type="text" name="collaboratorName" placeholder="Nome do Analista (ex: nome.sobrenome)" value={formData.collaboratorName} onChange={handleInputChange} className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-green-500 focus:border-green-500" />
                                 <input type="date" name="date" value={formData.date} onChange={handleInputChange} className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-green-500 focus:border-green-500" />
                                 <input type="text" name="unit" placeholder="Unidade (Ex: Nome da Garagem)" value={formData.unit} onChange={handleInputChange} className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-green-500 focus:border-green-500" />
                                 <input type="text" name="city" placeholder="Cidade (Opcional)" value={formData.city} onChange={handleInputChange} className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-green-500 focus:border-green-500" />
@@ -702,8 +731,8 @@ const App: React.FC = () => {
                                     <div>
                                         <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-4">Fotos Iniciais</h3>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <FileInput label="Foto Interna (Antes da Preventiva)" onChange={(e) => handleFileChange(e, 'beforeInternalPhoto')} fileName={formData.beforeInternalPhotoName} previewUrl={formData.beforeInternalPhoto}/>
-                                            <FileInput label="Foto Externa (Antes da Preventiva)" onChange={(e) => handleFileChange(e, 'beforeExternalPhoto')} fileName={formData.beforeExternalPhotoName} previewUrl={formData.beforeExternalPhoto}/>
+                                            <FileInput label="Foto Interna (Antes da Preventiva)" onChange={(e) => handleFileChange(e, 'beforeInternalPhoto')} onRemove={() => handleFileRemove('beforeInternalPhoto')} fileName={formData.beforeInternalPhotoName} previewUrl={formData.beforeInternalPhoto}/>
+                                            <FileInput label="Foto Externa (Antes da Preventiva)" onChange={(e) => handleFileChange(e, 'beforeExternalPhoto')} onRemove={() => handleFileRemove('beforeExternalPhoto')} fileName={formData.beforeExternalPhotoName} previewUrl={formData.beforeExternalPhoto}/>
                                         </div>
                                     </div>
                                     <div className="pt-6 border-t border-gray-200 dark:border-gray-800">
@@ -722,8 +751,8 @@ const App: React.FC = () => {
                                     <textarea name="repairDescription" placeholder="Descreva as necessidades do equipamento..." value={formData.repairDescription} onChange={handleInputChange} rows={4} className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-green-500 focus:border-green-500"></textarea>
                                 )}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <FileInput label="Foto Interna (Depois da Preventiva)" onChange={(e) => handleFileChange(e, 'internalPhoto')} fileName={formData.internalPhotoName} previewUrl={formData.internalPhoto}/>
-                                    <FileInput label="Foto Externa (Depois da Preventiva)" onChange={(e) => handleFileChange(e, 'externalPhoto')} fileName={formData.externalPhotoName} previewUrl={formData.externalPhoto}/>
+                                    <FileInput label="Foto Interna (Depois da Preventiva)" onChange={(e) => handleFileChange(e, 'internalPhoto')} onRemove={() => handleFileRemove('internalPhoto')} fileName={formData.internalPhotoName} previewUrl={formData.internalPhoto}/>
+                                    <FileInput label="Foto Externa (Depois da Preventiva)" onChange={(e) => handleFileChange(e, 'externalPhoto')} onRemove={() => handleFileRemove('externalPhoto')} fileName={formData.externalPhotoName} previewUrl={formData.externalPhoto}/>
                                 </div>
                                 <div className="mt-6 flex justify-center">
                                     <button onClick={handleSaveData} className="flex items-center gap-2 px-5 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
