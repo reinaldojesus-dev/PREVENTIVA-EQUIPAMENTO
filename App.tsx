@@ -247,7 +247,7 @@ const PdfContent = React.forwardRef<HTMLDivElement, PdfContentProps>(({ formData
             <div className="text-xs space-y-1">
                 <div className="flex justify-between">
                     <p><strong>Analista:</strong> {formData.collaboratorName || 'Não informado'}</p>
-                    <p><strong>Data:</strong> {new Date(formData.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</p>
+                    <p><strong>Data e Hora:</strong> {new Date(formData.date).toLocaleString('pt-BR')}</p>
                 </div>
                 <div className="flex justify-between">
                     <p><strong>Unidade:</strong> {formData.unit || 'Não informado'}</p>
@@ -342,7 +342,7 @@ const App: React.FC = () => {
         id: 0,
         savedAt: 0,
         collaboratorName: '',
-        date: new Date().toISOString().split('T')[0],
+        date: new Date().toISOString(),
         unit: '',
         city: '',
         equipmentType: EquipmentType.NONE,
@@ -471,8 +471,8 @@ const App: React.FC = () => {
             // Reset equipment-related fields for the next entry, keeping identification data
             setFormData(prev => ({
                 ...initialFormData,
+                date: new Date().toISOString(),
                 collaboratorName: prev.collaboratorName,
-                date: prev.date,
                 unit: prev.unit,
                 city: prev.city,
             }));
@@ -531,8 +531,8 @@ const App: React.FC = () => {
         const newType = e.target.value as EquipmentType;
         setFormData(prev => ({
             ...initialFormData,
+            date: new Date().toISOString(),
             collaboratorName: prev.collaboratorName,
-            date: prev.date,
             unit: prev.unit,
             city: prev.city,
             equipmentType: newType,
@@ -819,7 +819,9 @@ const App: React.FC = () => {
                             <h2 className="text-xl font-semibold mb-4 border-b pb-2 border-gray-200 dark:border-gray-800">Identificação</h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <AutocompleteInput name="collaboratorName" placeholder="Nome do Analista" value={formData.collaboratorName} onChange={handleInputChange} suggestions={analystSuggestions} />
-                                <input type="date" name="date" value={formData.date} onChange={handleInputChange} className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-green-500 focus:border-green-500" />
+                                <div className="w-full p-3 bg-gray-100 dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700 rounded-md">
+                                    <p className="text-gray-700 dark:text-gray-300">{new Date(formData.date).toLocaleString('pt-BR')}</p>
+                                </div>
                                 <AutocompleteInput name="unit" placeholder="Unidade (Ex: Nome da Garagem)" value={formData.unit} onChange={handleInputChange} suggestions={unitSuggestions} />
                                 <AutocompleteInput name="city" placeholder="Cidade (Opcional)" value={formData.city} onChange={handleInputChange} suggestions={citySuggestions} />
                             </div>
