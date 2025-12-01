@@ -427,9 +427,8 @@ const App: React.FC = () => {
     };
 
     const handleSaveData = () => {
-        const analystNameRegex = /^[a-zA-Z]+\.[a-zA-Z]+$/;
-        if (!formData.collaboratorName || !analystNameRegex.test(formData.collaboratorName)) {
-            alert("Formato do Nome do Analista inválido. Por favor, preencha o campo no formato 'nome.sobrenome' (ex: reinaldo.jesus).");
+        if (!formData.collaboratorName) {
+            alert("Por favor, preencha o Nome do Analista.");
             return;
         }
 
@@ -819,7 +818,7 @@ const App: React.FC = () => {
                         <div className="p-6 border border-gray-200 dark:border-gray-800 rounded-lg">
                             <h2 className="text-xl font-semibold mb-4 border-b pb-2 border-gray-200 dark:border-gray-800">Identificação</h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <AutocompleteInput name="collaboratorName" placeholder="Nome do Analista (ex: nome.sobrenome)" value={formData.collaboratorName} onChange={handleInputChange} suggestions={analystSuggestions} />
+                                <AutocompleteInput name="collaboratorName" placeholder="Nome do Analista" value={formData.collaboratorName} onChange={handleInputChange} suggestions={analystSuggestions} />
                                 <input type="date" name="date" value={formData.date} onChange={handleInputChange} className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-green-500 focus:border-green-500" />
                                 <AutocompleteInput name="unit" placeholder="Unidade (Ex: Nome da Garagem)" value={formData.unit} onChange={handleInputChange} suggestions={unitSuggestions} />
                                 <AutocompleteInput name="city" placeholder="Cidade (Opcional)" value={formData.city} onChange={handleInputChange} suggestions={citySuggestions} />
