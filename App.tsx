@@ -726,7 +726,7 @@ const App: React.FC = () => {
         switch (formData.equipmentType) {
             case EquipmentType.TERMINAIS:
                 const terminaisData = checklist as Partial<TerminaisChecklist>;
-                return renderSection("Checklist de Terminais",
+                return renderSection("Checklist de Terminal",
                     <>
                         <CheckboxItem name="limpezaGabinete" label="1. Limpeza interna e externa do gabinete" checked={!!terminaisData.limpezaGabinete} onChange={handleCheckboxChange} />
                         <CheckboxItem name="organizacaoCabosTerminais" label="2. Organização dos cabeamentos" checked={!!terminaisData.organizacaoCabosTerminais} onChange={handleCheckboxChange} />
@@ -738,7 +738,7 @@ const App: React.FC = () => {
 
             case EquipmentType.CANCELAS:
                 const cancelasData = checklist as Partial<CancelasChecklist>;
-                return renderSection("Checklist de Cancelas",
+                return renderSection("Checklist de Cancela",
                     <>
                         <CheckboxItem name="lubrificacaoEixoMotor" label="1. Lubrificação do eixo do motor com graxa" checked={!!cancelasData.lubrificacaoEixoMotor} onChange={handleCheckboxChange} />
                         <CheckboxItem name="lubrificacaoPartesArticuladas" label="2. Lubrificação das partes articuladas" checked={!!cancelasData.lubrificacaoPartesArticuladas} onChange={handleCheckboxChange} />
@@ -833,8 +833,8 @@ const App: React.FC = () => {
                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <select name="equipmentType" value={formData.equipmentType} onChange={handleEquipmentChange} className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-green-500 focus:border-green-500">
                                     <option value={EquipmentType.NONE} disabled>Selecione o tipo...</option>
-                                    <option value={EquipmentType.TERMINAIS}>Terminais</option>
-                                    <option value={EquipmentType.CANCELAS}>Cancelas</option>
+                                    <option value={EquipmentType.TERMINAIS}>Terminal</option>
+                                    <option value={EquipmentType.CANCELAS}>Cancela</option>
                                     <option value={EquipmentType.CAMERAS}>Câmeras de Acesso</option>
                                     <option value={EquipmentType.CAIXA}>Caixa</option>
                                     <option value={EquipmentType.EPA}>EPA</option>

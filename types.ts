@@ -1,13 +1,13 @@
 export enum EquipmentType {
   NONE = 'NONE',
-  TERMINAIS = 'TERMINAIS',
-  CANCELAS = 'CANCELAS',
-  CAMERAS = 'CAMERAS',
-  CAIXA = 'CAIXA',
+  TERMINAIS = 'Terminal',
+  CANCELAS = 'Cancela',
+  CAMERAS = 'Câmeras de Acesso',
+  CAIXA = 'Caixa',
   EPA = 'EPA',
   CFTV = 'CFTV',
-  RACK_CPD = 'RACK_CPD',
-  OUTROS = 'OUTROS',
+  RACK_CPD = 'Rack (CPD)',
+  OUTROS = 'Outros',
 }
 
 export interface BaseChecklist {
