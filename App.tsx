@@ -274,12 +274,8 @@ const PdfContent = React.forwardRef<HTMLDivElement, PdfContentProps>(({ formData
             {checklistItems.length > 0 ? (
                 <ul className="list-none space-y-1 text-xs">
                     {checklistItems.map(item => (
-                        <li key={item.label} className="flex items-start">
-                           <div className="flex-shrink-0 w-3 h-3 mr-2 border border-gray-500 flex items-center justify-center" style={{ marginTop: '2px' }}>
-                                {item.checked && (
-                                    <span className="font-bold text-green-600" style={{ fontSize: '10px', lineHeight: '1' }}>✓</span>
-                                )}
-                            </div>
+                        <li key={item.label} className="flex items-center">
+                            <span className={`inline-block w-3 h-3 mr-2 border ${item.checked ? 'bg-green-500 border-green-700' : 'bg-white border-gray-400'}`}></span>
                             <span>{item.label}</span>
                         </li>
                     ))}
