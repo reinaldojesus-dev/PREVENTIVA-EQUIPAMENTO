@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { EquipmentType, FormData, TerminaisChecklist, CancelasChecklist, CamerasChecklist, CaixaEpaChecklist, CftvChecklist, RackCpdChecklist } from './types';
-import { estaparLogoBase64 } from './logo';
 
 // Type declarations for window-injected libraries
 declare global {
@@ -239,8 +238,7 @@ const PdfContent = React.forwardRef<HTMLDivElement, PdfContentProps>(({ formData
 
     return (
     <div ref={ref} className="p-6 bg-white text-black font-sans" style={{ width: '8.5in' }}>
-        <header className="flex items-center justify-start mb-4 pb-2 border-b border-gray-300">
-            <img src={estaparLogoBase64} alt="Estapar Logo" style={{ width: '120px', height: 'auto', marginRight: '24px' }} />
+        <header className="text-center mb-4">
             <h1 className="text-xl font-bold text-gray-800">Relatório de Manutenção Preventiva</h1>
         </header>
 
