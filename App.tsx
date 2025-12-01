@@ -190,10 +190,9 @@ const getChecklistItemsForPdf = (formData: FormData): { label: string; checked: 
         [EquipmentType.CAMERAS_CFTV]: [
             { name: "limpezaLenteCameras", label: "1. Limpeza da lente das câmeras" },
             { name: "verificarFocoPosicionamento", label: "2. Verificar foco e posicionamento" },
-            { name: "fotosDepoisCameras", label: "3. Fotos das câmeras, depois de finalizar a preventiva" },
-            { name: "organizacaoCabosCftv", label: "4. Organização dos cabos" },
-            { name: "ajustarHorarioPdv", label: "5. Verificar/ ajustar o horário com o do PDV" },
-            { name: "ajustarNomenclaturaNvr", label: "6. Verificar/ ajustar Nomenclatura das câmeras do NVR" },
+            { name: "organizacaoCabosCftv", label: "3. Organização dos cabos" },
+            { name: "ajustarHorarioPdv", label: "4. Verificar/ ajustar o horário com o do PDV" },
+            { name: "ajustarNomenclaturaNvr", label: "5. Verificar/ ajustar Nomenclatura das câmeras do NVR" },
         ],
         [EquipmentType.CAIXA]: [
             { name: "verificarImagemPadrao", label: "1. Verificar se está com a imagem padrão" },
@@ -750,10 +749,9 @@ const App: React.FC = () => {
                     <>
                         <CheckboxItem name="limpezaLenteCameras" label="1. Limpeza da lente das câmeras" checked={!!camerasCftvData.limpezaLenteCameras} onChange={handleCheckboxChange} />
                         <CheckboxItem name="verificarFocoPosicionamento" label="2. Verificar foco e posicionamento" checked={!!camerasCftvData.verificarFocoPosicionamento} onChange={handleCheckboxChange} />
-                        <CheckboxItem name="fotosDepoisCameras" label="3. Fotos das câmeras, depois de finalizar a preventiva" checked={!!camerasCftvData.fotosDepoisCameras} onChange={handleCheckboxChange} />
-                        <CheckboxItem name="organizacaoCabosCftv" label="4. Organização dos cabos" checked={!!camerasCftvData.organizacaoCabosCftv} onChange={handleCheckboxChange} />
-                        <CheckboxItem name="ajustarHorarioPdv" label="5. Verificar/ ajustar o horário com o do PDV" checked={!!camerasCftvData.ajustarHorarioPdv} onChange={handleCheckboxChange} />
-                        <CheckboxItem name="ajustarNomenclaturaNvr" label="6. Verificar/ ajustar Nomenclatura das câmeras do NVR" checked={!!camerasCftvData.ajustarNomenclaturaNvr} onChange={handleCheckboxChange} />
+                        <CheckboxItem name="organizacaoCabosCftv" label="3. Organização dos cabos" checked={!!camerasCftvData.organizacaoCabosCftv} onChange={handleCheckboxChange} />
+                        <CheckboxItem name="ajustarHorarioPdv" label="4. Verificar/ ajustar o horário com o do PDV" checked={!!camerasCftvData.ajustarHorarioPdv} onChange={handleCheckboxChange} />
+                        <CheckboxItem name="ajustarNomenclaturaNvr" label="5. Verificar/ ajustar Nomenclatura das câmeras do NVR" checked={!!camerasCftvData.ajustarNomenclaturaNvr} onChange={handleCheckboxChange} />
                     </>
                 );
 

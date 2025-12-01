@@ -35,7 +35,6 @@ export interface CancelasChecklist {
 export interface CamerasCftvChecklist {
   limpezaLenteCameras: boolean;
   verificarFocoPosicionamento: boolean;
-  fotosDepoisCameras: boolean;
   organizacaoCabosCftv: boolean;
   ajustarHorarioPdv: boolean;
   ajustarNomenclaturaNvr: boolean;
