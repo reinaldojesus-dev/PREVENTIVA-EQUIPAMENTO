@@ -2,10 +2,9 @@ export enum EquipmentType {
   NONE = 'NONE',
   TERMINAIS = 'Terminal',
   CANCELAS = 'Cancela',
-  CAMERAS = 'Câmeras de Acesso',
+  CAMERAS_CFTV = 'Câmeras / CFTV',
   CAIXA = 'Caixa',
   EPA = 'EPA',
-  CFTV = 'CFTV',
   RACK_CPD = 'Rack (CPD)',
   OUTROS = 'Outros',
 }
@@ -30,13 +29,16 @@ export interface TerminaisChecklist {
 export interface CancelasChecklist {
   lubrificacaoEixoMotor: boolean;
   lubrificacaoPartesArticuladas: boolean;
-  fotosDepoisCancelas: boolean;
+  limpaContatoConexoesCancela: boolean;
 }
 
-export interface CamerasChecklist {
+export interface CamerasCftvChecklist {
   limpezaLenteCameras: boolean;
   verificarFocoPosicionamento: boolean;
   fotosDepoisCameras: boolean;
+  organizacaoCabosCftv: boolean;
+  ajustarHorarioPdv: boolean;
+  ajustarNomenclaturaNvr: boolean;
 }
 
 export interface CaixaEpaChecklist {
@@ -48,12 +50,6 @@ export interface CaixaEpaChecklist {
   verificarVersaoPdv: boolean;
   checagemAcessosRemotos: boolean;
   verificarNomeMaquina: boolean;
-}
-
-export interface CftvChecklist {
-  organizacaoCabosCftv: boolean;
-  ajustarHorarioPdv: boolean;
-  ajustarNomenclaturaNvr: boolean;
 }
 
 export interface RackCpdChecklist {
@@ -76,7 +72,7 @@ export interface FormData extends BaseChecklist {
   terminalLaneType: string;
   locationName: string;
   otherEquipmentName: string;
-  checklist: Partial<TerminaisChecklist & CancelasChecklist & CamerasChecklist & CaixaEpaChecklist & CftvChecklist & RackCpdChecklist>;
+  checklist: Partial<TerminaisChecklist & CancelasChecklist & CamerasCftvChecklist & CaixaEpaChecklist & RackCpdChecklist>;
   beforeInternalPhoto?: string;
   beforeInternalPhotoName?: string;
   beforeExternalPhoto?: string;

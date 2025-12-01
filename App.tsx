@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { EquipmentType, FormData, TerminaisChecklist, CancelasChecklist, CamerasChecklist, CaixaEpaChecklist, CftvChecklist, RackCpdChecklist } from './types';
+import { EquipmentType, FormData, TerminaisChecklist, CancelasChecklist, CamerasCftvChecklist, CaixaEpaChecklist, RackCpdChecklist } from './types';
 
 // Type declarations for window-injected libraries
 declare global {
@@ -180,17 +180,20 @@ const getChecklistItemsForPdf = (formData: FormData): { label: string; checked: 
             { name: "organizacaoCabosTerminais", label: "2. Organização dos cabeamentos" },
             { name: "limpezaImpressoraGuilhotina", label: "3. Limpeza da impressora e lubrificação da guilhotina" },
             { name: "limpezaLeitorTerminal", label: "4. Limpeza do leitor" },
-            { name: "limpaContatoConexoes", label: "5. Limpeza c/ limpa contato em conexões eletrônicas e placas" },
+            { name: "limpaContatoConexoes", label: "5. Limpeza com limpa contato nos conectores eletrônicos e placas" },
         ],
         [EquipmentType.CANCELAS]: [
             { name: "lubrificacaoEixoMotor", label: "1. Lubrificação do eixo do motor com graxa" },
             { name: "lubrificacaoPartesArticuladas", label: "2. Lubrificação das partes articuladas" },
-            { name: "fotosDepoisCancelas", label: "3. Fotos das cancelas, depois de finalizar a preventiva (parte interna e externa)" },
+            { name: "limpaContatoConexoesCancela", label: "3. Limpeza com limpa contato nos conectores eletrônicos e placas" },
         ],
-        [EquipmentType.CAMERAS]: [
+        [EquipmentType.CAMERAS_CFTV]: [
             { name: "limpezaLenteCameras", label: "1. Limpeza da lente das câmeras" },
             { name: "verificarFocoPosicionamento", label: "2. Verificar foco e posicionamento" },
             { name: "fotosDepoisCameras", label: "3. Fotos das câmeras, depois de finalizar a preventiva" },
+            { name: "organizacaoCabosCftv", label: "4. Organização dos cabos" },
+            { name: "ajustarHorarioPdv", label: "5. Verificar/ ajustar o horário com o do PDV" },
+            { name: "ajustarNomenclaturaNvr", label: "6. Verificar/ ajustar Nomenclatura das câmeras do NVR" },
         ],
         [EquipmentType.CAIXA]: [
             { name: "verificarImagemPadrao", label: "1. Verificar se está com a imagem padrão" },
@@ -211,11 +214,6 @@ const getChecklistItemsForPdf = (formData: FormData): { label: string; checked: 
             { name: "verificarVersaoPdv", label: "6. Verificar/atualizar a versão do EPA" },
             { name: "checagemAcessosRemotos", label: "7. Checagem dos Usuários e acessos remotos. (VNC e TS)" },
             { name: "verificarNomeMaquina", label: "8. Verificar se o nome da máquina está correto" },
-        ],
-        [EquipmentType.CFTV]: [
-             { name: "organizacaoCabosCftv", label: "1. Organização dos cabos" },
-             { name: "ajustarHorarioPdv", label: "2. Verificar/ ajustar o horário com o do PDV" },
-             { name: "ajustarNomenclaturaNvr", label: "3. Verificar/ ajustar Nomenclatura das câmeras do NVR" },
         ],
         [EquipmentType.RACK_CPD]: [
             { name: "limpezaOrganizacaoCabosRack", label: "1. Limpeza e organização dos cabos" },
@@ -732,7 +730,7 @@ const App: React.FC = () => {
                         <CheckboxItem name="organizacaoCabosTerminais" label="2. Organização dos cabeamentos" checked={!!terminaisData.organizacaoCabosTerminais} onChange={handleCheckboxChange} />
                         <CheckboxItem name="limpezaImpressoraGuilhotina" label="3. Limpeza da impressora e lubrificação da guilhotina" checked={!!terminaisData.limpezaImpressoraGuilhotina} onChange={handleCheckboxChange} />
                         <CheckboxItem name="limpezaLeitorTerminal" label="4. Limpeza do leitor" checked={!!terminaisData.limpezaLeitorTerminal} onChange={handleCheckboxChange} />
-                        <CheckboxItem name="limpaContatoConexoes" label="5. Limpeza c/ limpa contato em conexões eletrônicas e placas" checked={!!terminaisData.limpaContatoConexoes} onChange={handleCheckboxChange} />
+                        <CheckboxItem name="limpaContatoConexoes" label="5. Limpeza com limpa contato nos conectores eletrônicos e placas" checked={!!terminaisData.limpaContatoConexoes} onChange={handleCheckboxChange} />
                     </>
                 );
 
@@ -742,17 +740,20 @@ const App: React.FC = () => {
                     <>
                         <CheckboxItem name="lubrificacaoEixoMotor" label="1. Lubrificação do eixo do motor com graxa" checked={!!cancelasData.lubrificacaoEixoMotor} onChange={handleCheckboxChange} />
                         <CheckboxItem name="lubrificacaoPartesArticuladas" label="2. Lubrificação das partes articuladas" checked={!!cancelasData.lubrificacaoPartesArticuladas} onChange={handleCheckboxChange} />
-                        <CheckboxItem name="fotosDepoisCancelas" label="3. Fotos das cancelas, depois de finalizar a preventiva (parte interna e externa)" checked={!!cancelasData.fotosDepoisCancelas} onChange={handleCheckboxChange} />
+                        <CheckboxItem name="limpaContatoConexoesCancela" label="3. Limpeza com limpa contato nos conectores eletrônicos e placas" checked={!!cancelasData.limpaContatoConexoesCancela} onChange={handleCheckboxChange} />
                     </>
                 );
 
-            case EquipmentType.CAMERAS:
-                const camerasData = checklist as Partial<CamerasChecklist>;
-                return renderSection("Checklist de Câmeras de Acesso",
+            case EquipmentType.CAMERAS_CFTV:
+                const camerasCftvData = checklist as Partial<CamerasCftvChecklist>;
+                return renderSection("Checklist de Câmeras / CFTV",
                     <>
-                        <CheckboxItem name="limpezaLenteCameras" label="1. Limpeza da lente das câmeras" checked={!!camerasData.limpezaLenteCameras} onChange={handleCheckboxChange} />
-                        <CheckboxItem name="verificarFocoPosicionamento" label="2. Verificar foco e posicionamento" checked={!!camerasData.verificarFocoPosicionamento} onChange={handleCheckboxChange} />
-                        <CheckboxItem name="fotosDepoisCameras" label="3. Fotos das câmeras, depois de finalizar a preventiva" checked={!!camerasData.fotosDepoisCameras} onChange={handleCheckboxChange} />
+                        <CheckboxItem name="limpezaLenteCameras" label="1. Limpeza da lente das câmeras" checked={!!camerasCftvData.limpezaLenteCameras} onChange={handleCheckboxChange} />
+                        <CheckboxItem name="verificarFocoPosicionamento" label="2. Verificar foco e posicionamento" checked={!!camerasCftvData.verificarFocoPosicionamento} onChange={handleCheckboxChange} />
+                        <CheckboxItem name="fotosDepoisCameras" label="3. Fotos das câmeras, depois de finalizar a preventiva" checked={!!camerasCftvData.fotosDepoisCameras} onChange={handleCheckboxChange} />
+                        <CheckboxItem name="organizacaoCabosCftv" label="4. Organização dos cabos" checked={!!camerasCftvData.organizacaoCabosCftv} onChange={handleCheckboxChange} />
+                        <CheckboxItem name="ajustarHorarioPdv" label="5. Verificar/ ajustar o horário com o do PDV" checked={!!camerasCftvData.ajustarHorarioPdv} onChange={handleCheckboxChange} />
+                        <CheckboxItem name="ajustarNomenclaturaNvr" label="6. Verificar/ ajustar Nomenclatura das câmeras do NVR" checked={!!camerasCftvData.ajustarNomenclaturaNvr} onChange={handleCheckboxChange} />
                     </>
                 );
 
@@ -778,16 +779,6 @@ const App: React.FC = () => {
                     </>
                 );
 
-            case EquipmentType.CFTV:
-                const cftvData = checklist as Partial<CftvChecklist>;
-                return renderSection("Checklist de CFTV",
-                    <>
-                        <CheckboxItem name="organizacaoCabosCftv" label="1. Organização dos cabos" checked={!!cftvData.organizacaoCabosCftv} onChange={handleCheckboxChange} />
-                        <CheckboxItem name="ajustarHorarioPdv" label="2. Verificar/ ajustar o horário com o do PDV" checked={!!cftvData.ajustarHorarioPdv} onChange={handleCheckboxChange} />
-                        <CheckboxItem name="ajustarNomenclaturaNvr" label="3. Verificar/ ajustar Nomenclatura das câmeras do NVR" checked={!!cftvData.ajustarNomenclaturaNvr} onChange={handleCheckboxChange} />
-                    </>
-                );
-            
             case EquipmentType.RACK_CPD:
                 const rackCpdData = checklist as Partial<RackCpdChecklist>;
                 return renderSection("Checklist de Rack (CPD)",
@@ -835,10 +826,9 @@ const App: React.FC = () => {
                                     <option value={EquipmentType.NONE} disabled>Selecione o tipo...</option>
                                     <option value={EquipmentType.TERMINAIS}>Terminal</option>
                                     <option value={EquipmentType.CANCELAS}>Cancela</option>
-                                    <option value={EquipmentType.CAMERAS}>Câmeras de Acesso</option>
+                                    <option value={EquipmentType.CAMERAS_CFTV}>Câmeras / CFTV</option>
                                     <option value={EquipmentType.CAIXA}>Caixa</option>
                                     <option value={EquipmentType.EPA}>EPA</option>
-                                    <option value={EquipmentType.CFTV}>CFTV</option>
                                     <option value={EquipmentType.RACK_CPD}>Rack (CPD)</option>
                                     <option value={EquipmentType.OUTROS}>Outros</option>
                                 </select>
