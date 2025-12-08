@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { EquipmentType, FormData, TerminaisChecklist, CancelasChecklist, CamerasCftvChecklist, CaixaEpaChecklist, RackCpdChecklist } from './types';
+import { estaparLogoBase64 } from './logo';
 
 // Type declarations for window-injected libraries
 declare global {
@@ -235,7 +236,8 @@ const PdfContent = React.forwardRef<HTMLDivElement, PdfContentProps>(({ formData
 
     return (
     <div ref={ref} className="p-6 bg-white text-black font-sans" style={{ width: '8.5in' }}>
-        <header className="text-center mb-4">
+        <header className="flex items-center justify-between p-4 border-b border-gray-300 mb-4">
+            <img src={estaparLogoBase64} alt="Logo" style={{ height: '40px' }} />
             <h1 className="text-xl font-bold text-gray-800">Relatório de Manutenção Preventiva</h1>
         </header>
 
@@ -437,10 +439,25 @@ const App: React.FC = () => {
         try {
             let history: FormData[] = [...savedChecklists];
 
+            // Create a lightweight version of the checklist for history, without large image data
+            const getLightweightChecklist = (data: FormData): FormData => ({
+                ...data,
+                beforeInternalPhoto: undefined,
+                beforeInternalPhotoName: data.beforeInternalPhotoName, // keep name for reference
+                beforeExternalPhoto: undefined,
+                beforeExternalPhotoName: data.beforeExternalPhotoName,
+                internalPhoto: undefined,
+                internalPhotoName: data.internalPhotoName,
+                externalPhoto: undefined,
+                externalPhotoName: data.externalPhotoName,
+            });
+
+
             // If formData has an ID, it's an update.
             if (formData.id !== 0) {
                 const updatedChecklist = { ...formData, savedAt: Date.now() };
-                history = history.map(c => c.id === formData.id ? updatedChecklist : c);
+                const lightweightChecklist = getLightweightChecklist(updatedChecklist);
+                history = history.map(c => c.id === formData.id ? lightweightChecklist : c);
                 alert('Checklist atualizado com sucesso!');
             } else { // Otherwise, it's a new entry.
                 const newChecklist = { 
@@ -448,7 +465,8 @@ const App: React.FC = () => {
                     id: generateUniqueId(),
                     savedAt: Date.now() 
                 };
-                history.unshift(newChecklist);
+                const lightweightChecklist = getLightweightChecklist(newChecklist);
+                history.unshift(lightweightChecklist);
                  alert('Checklist salvo com sucesso na lista de recentes!');
             }
             
@@ -485,7 +503,7 @@ const App: React.FC = () => {
         if (checklistToLoad) {
             setFormData(checklistToLoad);
             window.scrollTo(0, 0);
-            alert('Checklist carregado para edição!');
+            alert('Checklist carregado para edição! (Fotos não são recuperadas do histórico)');
         }
     };
 
